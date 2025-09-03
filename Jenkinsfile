@@ -1,29 +1,41 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage('git checkout'){
-            steps{
-              git 'https://github.com/eswari48/Train-Ticket-Reservation-System.git' 
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git 'https://github.com/eswari48/Train-Ticket-Reservation-System.git'
             }
         }
-        stage('validate'){
-            steps{
-                sh 'mvn validate'
+
+        stage('Maven Package') {
+            steps {
+                sh 'mvn clean package'
             }
         }
-        stage('compile'){
-            steps{
-                sh 'mvn compile'
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t train-ticket-reservation:latest .'
+                }
             }
         }
-        stage('test'){
-            steps{
-                sh 'mvn test'
-            }
-        }
-        stage('package'){
-            steps{
-                sh 'mvn package'
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Remove existing container if running
+                    sh '''
+                        if [ $(docker ps -aq -f name=train-ticket-app) ]; then
+                            echo "Stopping and removing old container..."
+                            docker rm -f train-ticket-app
+                        fi
+                    '''
+
+                    // Run new container
+                    sh 'docker run -d --name train-ticket-app -p 8082:8080 train-ticket-reservation:latest'
+                }
             }
         }
     }
