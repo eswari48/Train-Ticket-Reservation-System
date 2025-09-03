@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy the WAR file instead of JAR
 COPY target/*.war app.war
 
-EXPOSE 8080
+EXPOSE 8082
 
 # Run WAR using embedded Tomcat (webapp-runner)
 COPY target/dependency/webapp-runner.jar webapp-runner.jar
